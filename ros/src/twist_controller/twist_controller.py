@@ -18,13 +18,13 @@ class Controller(object):
         kp = 0.3
         ki = 0.1
         kd = 0.
-        mn = 0.   # max throttle
+        mn = 0.5*accel_limit   # max throttle
         mx = 0.2  # min throttle
         self.throttle_controller = PID(kp, ki, kd, mn, mx)
 
         tau = 0.5 # 1/(2pi*tau) = cutoff frequency
         ts = 0.02 # Sample time
-        
+
         self.vel_lpf = LowPassFilter(tau, ts)
         self.vehicle_mass = vehicle_mass
         self.fuel_capacity = fuel_capacity
