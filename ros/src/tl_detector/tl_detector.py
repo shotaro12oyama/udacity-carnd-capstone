@@ -44,6 +44,8 @@ class TLDetector(object):
         self.upcoming_red_light_pub = rospy.Publisher('/traffic_waypoint', Int32, queue_size=1)
 
         self.bridge = CvBridge()
+        
+        rospy.loginfo("I will publish to the topic %s", rospy.get_param('~model_path'))
         self.light_classifier = TLClassifier(rospy.get_param('~model_path'))
         self.listener = tf.TransformListener()
 
@@ -55,7 +57,7 @@ class TLDetector(object):
         rospy.Subscriber('/current_pose', PoseStamped, self.pose_cb)
         rospy.Subscriber('/base_waypoints', Lane, self.waypoints_cb)
 
-        '''
+        '''rospy.loginfo(msg, *args)
         /vehicle/traffic_lights provides you with the location of the traffic light in 3D map space and
         helps you acquire an accurate ground truth data source for the traffic light
         classifier by sending the current color state of all traffic lights in the
