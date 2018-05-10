@@ -7,9 +7,6 @@ from styx_msgs.msg import Lane
 from sensor_msgs.msg import Image
 from scipy.spatial import KDTree
 from cv_bridge import CvBridge
-GAS_DENSITY = 2.858
-ONE_MPH = 0.44704
-
 from light_classification.tl_classifier import TLClassifier
 import tf
 import cv2
