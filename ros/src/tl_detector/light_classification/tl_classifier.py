@@ -4,13 +4,15 @@ import numpy as np
 import rospy
 
 class TLClassifier(object):
-    def __init__(self, model_path):
+    def __init__(self):
+
+        PATH_TO_GRAPH = r'light_classification/models/frozen_inference_graph_sim.pb'
         self.graph = tf.Graph()
         self.threshold = .5
 
         with self.graph.as_default():
             od_graph_def = tf.GraphDef()
-            with tf.gfile.GFile(model_path, 'rb') as fid:
+            with tf.gfile.GFile(PATH_TO_GRAPH, 'rb') as fid:
                 od_graph_def.ParseFromString(fid.read())
                 tf.import_graph_def(od_graph_def, name='')
 
