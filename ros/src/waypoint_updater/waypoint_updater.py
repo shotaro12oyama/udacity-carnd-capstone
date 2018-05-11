@@ -43,7 +43,6 @@ class WaypointUpdater(object):
         # TODO: Add a subscriber for /obstacle_waypoint
 
         self.final_waypoints_pub = rospy.Publisher('final_waypoints', Lane, queue_size=1)
-
         self.loop()
 
     def loop(self):
@@ -53,6 +52,7 @@ class WaypointUpdater(object):
                 # Get closest waypoint
                 closest_waypoint_idx = self.get_closest_waypoint_idx()
                 self.publish_waypoints(closest_waypoint_idx)
+                rospy.loginfo("publish_waypoints")
             rate.sleep()
 
     def get_closest_waypoint_idx(self):

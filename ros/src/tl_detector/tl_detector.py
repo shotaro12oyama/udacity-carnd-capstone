@@ -40,8 +40,9 @@ class TLDetector(object):
         self.state_count = 0
 
         rospy.Subscriber('/current_pose', PoseStamped, self.pose_cb)
-        rospy.Subscriber('/base_waypoints', Lane, self.waypoints_cb)
+        sub = rospy.Subscriber('/base_waypoints', Lane, self.waypoints_cb)
 
+        rospy.loginfo(sub)
         '''rospy.loginfo(msg, *args)
         /vehicle/traffic_lights provides you with the location of the traffic light in 3D map space and
         helps you acquire an accurate ground truth data source for the traffic light
@@ -52,8 +53,41 @@ class TLDetector(object):
         rospy.Subscriber('/vehicle/traffic_lights', TrafficLightArray, self.traffic_cb)
         rospy.Subscriber('/image_color', Image, self.image_cb)
 
-        rospy.spin()
+        if self.camera_image is not None:
+            rospy.loginfo("test image")
+        else:
+            rospy.loginfo("test image2")
+            
+        self.loop()
 
+    def loop(self):
+        rate = rospy.Rate(10)
+        rospy.loginfo("in the tl_detecotr loop")
+        while not rospy.is_shutdown():
+            
+            if self.camera_image is not None:
+                light_wp, state = self.process_traffic_lights()
+                rospy.loginfo("In the tl_detector loop23")
+            
+        
+                if self.state != state:
+                    self.state_count = 0
+                    self.state = state
+                elif self.state_count >= STATE_COUNT_THRESHOLD:
+                    if self.state_count == STATE_COUNT_THRESHOLD:
+                        rospy.loginfo('tl_detector detected traffic light change, {}, {}'.format(light_wp, state))
+
+                    self.last_state = self.state
+                    light_wp = light_wp if state == TrafficLight.RED else -1
+                    self.last_wp = light_wp
+                    self.upcoming_red_light_pub.publish(Int32(light_wp))
+                else:
+                    self.upcoming_red_light_pub.publish(Int32(self.last_wp))
+                    self.state_count += 1
+
+            rate.sleep()
+
+        
     def pose_cb(self, msg):
         self.pose = msg
 
@@ -80,6 +114,8 @@ class TLDetector(object):
         self.has_image = True
         self.camera_image = msg
         light_wp, state = self.process_traffic_lights()
+
+        rospy.loginfo("image_cb")
 
         '''
         Publish upcoming red lights at camera frequency.
@@ -133,6 +169,7 @@ class TLDetector(object):
             return TrafficLight.UNKNOWN
 
         cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
+        rospy.loginfo("in get_light_state")
 
         #Get classification
         return self.light_classifier.get_classification(cv_image)
