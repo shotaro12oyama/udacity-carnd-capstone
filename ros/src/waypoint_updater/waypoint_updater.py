@@ -165,6 +165,39 @@ class WaypointUpdater(object):
 
         return dists_reversed[::-1]
 
+    # Returns the index of the nearest waypoint ahead of the vehicle
+    def nearest_forward_waypoint(self):
+        vehicle = [self.vehicle.pose.position.x, self.vehicle.pose.position.y]
+        closest_index = self.waypoints_tree.query(vehicle, 1)[1]
+
+        closest_waypoint = np.array(self.waypoints_2d[closest_index])
+        previous_waypoint = np.array(self.waypoints_2d[closest_index - 1])
+        vehicle = np.array(vehicle)
+
+        waypoint_vector = closest_waypoint - previous_waypoint
+        vehicle_vector = vehicle - closest_waypoint
+
+        val = np.dot(waypoint_vector, vehicle_vector)
+
+        if val > 0:
+            closest_index = (closest_index + 1) % len(self.waypoints_2d)
+
+        return closest_index
+
+    def get_waypoint_velocity(self, waypoint):
+        return waypoint.twist.twist.linear.x
+
+    def set_waypoint_velocity(self, waypoints, waypoint, velocity):
+        waypoints[waypoint].twist.twist.linear.x = velocity
+
+    def distance(self, waypoints, wp1, wp2):
+        dist = 0
+        dl = lambda a, b: math.sqrt((a.x-b.x)**2 + (a.y-b.y)**2  + (a.z-b.z)**2)
+        for i in range(wp1, wp2+1):
+            dist += dl(waypoints[wp1].pose.pose.position, waypoints[i].pose.pose.position)
+            wp1 = i
+            
+return dist
 
 if __name__ == '__main__':
     try:
