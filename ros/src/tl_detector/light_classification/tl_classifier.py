@@ -6,7 +6,7 @@ import rospy
 class TLClassifier(object):
     def __init__(self):
 
-        PATH_TO_GRAPH = r'light_classification/models/frozen_inference_graph_sim.pb'
+        PATH_TO_GRAPH = r'light_classification/models/frozen_inference_graph.pb'
         self.graph = tf.Graph()
         self.threshold = .5
 

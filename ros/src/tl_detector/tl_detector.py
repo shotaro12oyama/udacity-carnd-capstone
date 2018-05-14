@@ -62,14 +62,11 @@ class TLDetector(object):
 
     def loop(self):
         rate = rospy.Rate(10)
-        rospy.loginfo("in the tl_detecotr loop")
         while not rospy.is_shutdown():
             
             if self.camera_image is not None:
                 light_wp, state = self.process_traffic_lights()
-                rospy.loginfo("In the tl_detector loop23")
             
-        
                 if self.state != state:
                     self.state_count = 0
                     self.state = state
@@ -114,8 +111,6 @@ class TLDetector(object):
         self.has_image = True
         self.camera_image = msg
         light_wp, state = self.process_traffic_lights()
-
-        rospy.loginfo("image_cb")
 
         '''
         Publish upcoming red lights at camera frequency.
@@ -169,7 +164,6 @@ class TLDetector(object):
             return TrafficLight.UNKNOWN
 
         cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
-        rospy.loginfo("in get_light_state")
 
         #Get classification
         return self.light_classifier.get_classification(cv_image)
