@@ -8,7 +8,7 @@ class TLClassifier(object):
 
         PATH_TO_GRAPH = r'light_classification/models/frozen_inference_graph.pb'
         self.graph = tf.Graph()
-        self.threshold = .5
+        self.threshold = .3
 
         with self.graph.as_default():
             od_graph_def = tf.GraphDef()
@@ -45,8 +45,12 @@ class TLClassifier(object):
             if classes[0] == 1:
                 return TrafficLight.GREEN
             elif classes[0] == 2:
+                rospy.loginfo('RED is detected!')
                 return TrafficLight.RED
             elif classes[0] == 3:
                 return TrafficLight.YELLOW
+
+        else:
+            rospy.loginfo('score is less than threshold')
 
         return TrafficLight.UNKNOWN

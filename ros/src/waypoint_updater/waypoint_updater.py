@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
 import rospy
-from geometry_msgs.msg import PoseStamped
+from geometry_msgs.msg import PoseStamped, Pose
 from std_msgs.msg import Int32
 from styx_msgs.msg import Lane, Waypoint
+from styx_msgs.msg import TrafficLightArray, TrafficLight
 from scipy.spatial import KDTree
 import numpy as np
 import math
@@ -39,7 +40,7 @@ class WaypointUpdater(object):
         rospy.Subscriber('/current_pose', PoseStamped, self.pose_cb)
         rospy.Subscriber('/base_waypoints', Lane, self.waypoints_cb)
         rospy.Subscriber('/traffic_waypoint', Int32, self.traffic_cb)
-        #rospy.Subscriber('/vehicle/traffic_lights' Int32, self.trafficlights_cb)
+        rospy.Subscriber('/vehicle/traffic_lights', TrafficLightArray, self.trafficlights_cb)
 
         # TODO: Add a subscriber for /obstacle_waypoint
 
@@ -47,7 +48,7 @@ class WaypointUpdater(object):
         self.loop()
 
     def loop(self):
-        rate = rospy.Rate(50)
+        rate = rospy.Rate(60)
         while not rospy.is_shutdown():
             if self.pose and self.base_waypoints and self.waypoints_2d and self.waypoint_tree:
                 self.publish_waypoints()
@@ -76,7 +77,7 @@ class WaypointUpdater(object):
 
     def publish_waypoints(self):
         final_lane = self.generate_lane()
-        rospy.loginfo('final_lane: {}'.format(final_lane.waypoints))
+        #rospy.loginfo('final_lane: {}'.format(final_lane.waypoints))
         self.final_waypoints_pub.publish(final_lane)
 
     def generate_lane(self):
@@ -91,6 +92,8 @@ class WaypointUpdater(object):
             lane.waypoints = base_waypoints
         else:
             lane.waypoints = self.decelerate_waypoints(base_waypoints, closest_idx)
+
+        rospy.loginfo('lane.waypoints c{}, f{}, s{}'.format(closest_idx, farthest_idx, self.stopline_wp_idx))
         return lane
 
     def decelerate_waypoints(self, waypoints, closest_idx):
@@ -103,7 +106,8 @@ class WaypointUpdater(object):
             stop_idx = max(self.stopline_wp_idx - closest_idx - 2, 0)
             dist = self.distance(waypoints, i , stop_idx)
             vel = math.sqrt(2 * MAX_DECEL * dist)
-            if vel < 1.:
+            rospy.loginfo('vel:{}, {}'.format(vel, stop_idx))
+            if i >= stop_idx:
                 vel = 0
             p.twist.twist.linear.x = min(vel, wp.twist.twist.linear.x)
             temp.append(p)
@@ -123,12 +127,17 @@ class WaypointUpdater(object):
             self.waypoint_tree = KDTree(self.waypoints_2d)
 
     def traffic_cb(self, msg):
+        rospy.loginfo('test traffic_cb :{}'.format(msg.data))
         if self.traffic_wp_idx != msg.data:
             rospy.loginfo('waypoint_updater received new traffic wp {}'.format(msg.data))
-        self.traffic_wp_idx = msg.data
+            self.stopline_wp_idx = msg.data
+        else:
+            self.traffic_wp_idx = msg.data
 
     def trafficlights_cb(self, msg):
-        self.stopline_wp_idx = msg
+        #self.stopline_wp_idx = msg
+        #rospy.loginfo('test traffic_lights_cb: {} '.format(msg.lights))
+        pass
 
     def obstacle_cb(self, msg):
         # TODO: Callback for /obstacle_waypoint message. We will implement it later

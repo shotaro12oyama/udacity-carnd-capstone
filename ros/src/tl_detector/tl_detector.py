@@ -53,14 +53,10 @@ class TLDetector(object):
         rospy.Subscriber('/vehicle/traffic_lights', TrafficLightArray, self.traffic_cb)
         rospy.Subscriber('/image_color', Image, self.image_cb)
 
-        if self.camera_image is not None:
-            rospy.loginfo("test image")
-        else:
-            rospy.loginfo("test image2")
-            
-        self.loop()
+        #self.loop()
+        rospy.spin()
 
-    def loop(self):
+    '''def loop(self):
         rate = rospy.Rate(10)
         while not rospy.is_shutdown():
             
@@ -82,7 +78,7 @@ class TLDetector(object):
                     self.upcoming_red_light_pub.publish(Int32(self.last_wp))
                     self.state_count += 1
 
-            rate.sleep()
+            rate.sleep()'''
 
         
     def pose_cb(self, msg):
@@ -129,6 +125,7 @@ class TLDetector(object):
             light_wp = light_wp if state == TrafficLight.RED else -1
             self.last_wp = light_wp
             self.upcoming_red_light_pub.publish(Int32(light_wp))
+            rospy.loginfo('upcoming_pub: {}'.format(light_wp))
         else:
             self.upcoming_red_light_pub.publish(Int32(self.last_wp))
         self.state_count += 1
@@ -206,8 +203,9 @@ class TLDetector(object):
 
         if closest_light:
             state = self.get_light_state(closest_light)
+            rospy.loginfo('closest light is true: line_wp_idx and state = {}, {}'.format(line_wp_idx, state))
             return line_wp_idx, state
-        
+
         return -1, TrafficLight.UNKNOWN
 
 if __name__ == '__main__':
