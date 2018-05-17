@@ -48,7 +48,7 @@ class WaypointUpdater(object):
         self.loop()
 
     def loop(self):
-        rate = rospy.Rate(60)
+        rate = rospy.Rate(10)
         while not rospy.is_shutdown():
             if self.pose and self.base_waypoints and self.waypoints_2d and self.waypoint_tree:
                 self.publish_waypoints()
@@ -77,7 +77,6 @@ class WaypointUpdater(object):
 
     def publish_waypoints(self):
         final_lane = self.generate_lane()
-        #rospy.loginfo('final_lane: {}'.format(final_lane.waypoints))
         self.final_waypoints_pub.publish(final_lane)
 
     def generate_lane(self):
@@ -87,13 +86,11 @@ class WaypointUpdater(object):
         farthest_idx = closest_idx + LOOKAHEAD_WPS
         base_waypoints = self.base_waypoints.waypoints[closest_idx : farthest_idx]
 
-
         if self.stopline_wp_idx == -1 or (self.stopline_wp_idx >= farthest_idx):
             lane.waypoints = base_waypoints
         else:
             lane.waypoints = self.decelerate_waypoints(base_waypoints, closest_idx)
 
-        rospy.loginfo('lane.waypoints c{}, f{}, s{}'.format(closest_idx, farthest_idx, self.stopline_wp_idx))
         return lane
 
     def decelerate_waypoints(self, waypoints, closest_idx):
@@ -104,9 +101,10 @@ class WaypointUpdater(object):
             p.pose = wp.pose
 
             stop_idx = max(self.stopline_wp_idx - closest_idx - 2, 0)
-            dist = self.distance(waypoints, i , stop_idx)
+            if len(waypoints) <= stop_idx:
+                return
+            dist = self.distance(waypoints, i, stop_idx)
             vel = math.sqrt(2 * MAX_DECEL * dist)
-            rospy.loginfo('vel:{}, {}'.format(vel, stop_idx))
             if i >= stop_idx:
                 vel = 0
             p.twist.twist.linear.x = min(vel, wp.twist.twist.linear.x)
@@ -127,16 +125,13 @@ class WaypointUpdater(object):
             self.waypoint_tree = KDTree(self.waypoints_2d)
 
     def traffic_cb(self, msg):
-        rospy.loginfo('test traffic_cb :{}'.format(msg.data))
         if self.traffic_wp_idx != msg.data:
-            rospy.loginfo('waypoint_updater received new traffic wp {}'.format(msg.data))
+
             self.stopline_wp_idx = msg.data
         else:
             self.traffic_wp_idx = msg.data
 
     def trafficlights_cb(self, msg):
-        #self.stopline_wp_idx = msg
-        #rospy.loginfo('test traffic_lights_cb: {} '.format(msg.lights))
         pass
 
     def obstacle_cb(self, msg):

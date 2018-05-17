@@ -6,7 +6,7 @@ import rospy
 class TLClassifier(object):
     def __init__(self):
 
-        PATH_TO_GRAPH = r'light_classification/models/frozen_inference_graph.pb'
+        PATH_TO_GRAPH = r'light_classification/models/frozen_inference_graph0517.pb'
         self.graph = tf.Graph()
         self.threshold = .3
 
@@ -39,18 +39,14 @@ class TLClassifier(object):
         scores = np.squeeze(scores)
         classes = np.squeeze(classes).astype(np.int32)
 
-        rospy.loginfo('score: {}, class: {}'.format(scores[0], classes[0]))
+        rospy.loginfo('classification score:{}, class:{}'.format(scores[0], classes[0]))
 
         if scores[0] > self.threshold:
             if classes[0] == 1:
                 return TrafficLight.GREEN
             elif classes[0] == 2:
-                rospy.loginfo('RED is detected!')
                 return TrafficLight.RED
             elif classes[0] == 3:
                 return TrafficLight.YELLOW
-
-        else:
-            rospy.loginfo('score is less than threshold')
 
         return TrafficLight.UNKNOWN

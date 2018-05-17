@@ -3,6 +3,7 @@ from lowpass import LowPassFilter
 from pid import PID
 from yaw_controller import YawController
 
+
 GAS_DENSITY = 2.858
 ONE_MPH = 0.44704
 
@@ -19,7 +20,7 @@ class Controller(object):
         ki = 0.1
         kd = 0.
         mn = 0.5*accel_limit   # max throttle
-        mx = 0.2  # min throttle
+        mx = 0.1  # min throttle
         self.throttle_controller = PID(kp, ki, kd, mn, mx)
 
         tau = 0.5 # 1/(2pi*tau) = cutoff frequency
@@ -57,19 +58,22 @@ class Controller(object):
 
         throttle = self.throttle_controller.step(vel_error, sample_time)
         brake = 0
+        #if vel_error brake = self.brake_controller()
+        rospy.loginfo('vel_error:{}'.format(vel_error))
 
         if linear_vel == 0. and current_vel < 0.1:
             throttle = 0
             brake = 400 # N*m - to hold teh car in place if we are stopped at a light. Acceleration - 1m/s^2
 
-        elif throttle < .1 and vel_error < 0:
+        if vel_error < 0:
             throttle = 0
             decel = max(vel_error, self.decel_limit)
-            brake = abs(decel) * self.vehicle_mass * self.wheel_radius # Torque N*m]
+            brake = abs(decel) * self.vehicle_mass * self.wheel_radius  # Torque N*m]
+            rospy.loginfo('brake:{}'.format(brake))
 
 
-        if current_vel > 15.0 and throttle > 2.0:
-            throttle == 0.1
+        if current_vel > 1.0:
+            throttle = min(throttle, 0.08)
 
 
 
