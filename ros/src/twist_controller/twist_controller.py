@@ -71,6 +71,9 @@ class Controller(object):
             brake = abs(decel) * self.vehicle_mass * self.wheel_radius  # Torque N*m]
             rospy.loginfo('brake:{}'.format(brake))
 
+        elif vel_error > 0:
+            throttle = 0.1
+            brake = 0
 
         if current_vel > 1.0:
             throttle = min(throttle, 0.08)
