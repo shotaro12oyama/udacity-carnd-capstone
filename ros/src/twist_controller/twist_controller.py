@@ -16,9 +16,9 @@ class Controller(object):
         
         self.yaw_controller = YawController(wheel_base, steer_ratio, 0.1, max_lat_accel, max_steer_angle)
 
-        kp = 0.3
+        kp = 0.5
         ki = 0.1
-        kd = 0.
+        kd = 0.1
         mn = 0.5*accel_limit   # max throttle
         mx = 0.1  # min throttle
         self.throttle_controller = PID(kp, ki, kd, mn, mx)
@@ -58,8 +58,6 @@ class Controller(object):
 
         throttle = self.throttle_controller.step(vel_error, sample_time)
         brake = 0
-        #if vel_error brake = self.brake_controller()
-        rospy.loginfo('vel_error:{}'.format(vel_error))
 
         if linear_vel == 0. and current_vel < 0.1:
             throttle = 0
@@ -68,15 +66,10 @@ class Controller(object):
         if vel_error < 0:
             throttle = 0
             decel = max(vel_error, self.decel_limit)
-            brake = abs(decel) * self.vehicle_mass * self.wheel_radius  # Torque N*m]
-            rospy.loginfo('brake:{}'.format(brake))
+            brake = abs(decel) * self.vehicle_mass * self.wheel_radius * 10  # Torque N*m]
 
-        elif vel_error > 0:
-            throttle = 0.1
-            brake = 0
-
-        if current_vel > 1.0:
-            throttle = min(throttle, 0.08)
+        if current_vel > 2.0:
+            throttle = min(throttle, 0.1)
 
 
 
