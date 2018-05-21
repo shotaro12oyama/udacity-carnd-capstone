@@ -2,7 +2,7 @@
 
 The steps provided here are taken from [here](https://github.com/alex-lechner/Traffic-Light-Classification).
 
-I add the steps on my environments as below.
+I added the summary of my actual steps as below.
 
 ## Environments
 * OS: Unbuntu 16.04TS
@@ -22,9 +22,8 @@ I add the steps on my environments as below.
 
 ### Get the model
 
-[SSD Inception V2 Coco (11/06/2017)](http://download.tensorflow.org/models/object_detection/ssd_inception_v2_coco_11_06_2017.tar.gz) Pro: Very fast, Con: Low precision
+[SSD Inception V2 Coco (11/06/2017)](http://download.tensorflow.org/models/object_detection/ssd_inception_v2_coco_11_06_2017.tar.gz) 
 
-[Faster RCNN Inception V2 Coco (28/01/2018)](http://download.tensorflow.org/models/object_detection/faster_rcnn_inception_v2_coco_2018_01_28.tar.gz) Pro: Good precision, Con: Slow
 
 ### Get the dataset
 
@@ -47,31 +46,6 @@ Download the required model tar.gz files and untar them into `/tensorflow/models
 
 ---
 
-## Commands for training the models and saving the weights for inference.
-
-## Using Faster-RCNN model
-
-### For Simulator Data
-
-#### Training
-
-`python object_detection/train.py --pipeline_config_path=config/faster_rcnn-traffic-udacity_sim.config --train_dir=data/sim_training_data/sim_data_capture`
-
-#### Saving for Inference
-
-`python object_detection/export_inference_graph.py --pipeline_config_path=config/faster_rcnn-traffic-udacity_sim.config --trained_checkpoint_prefix=data/sim_training_data/sim_data_capture/model.ckpt-5000 --output_directory=frozen_sim/`
-
-
-### For Real Data
-
-#### Training
-
-`python object_detection/train.py --pipeline_config_path=config/faster_rcnn-traffic_udacity_real.config --train_dir=data/real_training_data`
-
-#### Saving for Inference
-
-`python object_detection/export_inference_graph.py --pipeline_config_path=config/faster_rcnn-traffic_udacity_real.config --trained_checkpoint_prefix=data/real_training_data/model.ckpt-10000 --output_directory=frozen_real/`
-
 ---
 
 ## Using Inception SSD v2
@@ -84,7 +58,7 @@ Download the required model tar.gz files and untar them into `/tensorflow/models
 
 #### Saving for Inference
 
-`python object_detection/export_inference_graph.py --pipeline_config_path=config/ssd_inception-traffic-udacity_sim.config --trained_checkpoint_prefix=data/sim_training_data/sim_data_capture/model.ckpt-5000 --output_directory=frozen_models/frozen_sim_inception/`
+`python object_detection/export_inference_graph.py --pipeline_config_path=config/ssd_inception-traffic-udacity_sim.config --trained_checkpoint_prefix=data/sim_training_data/sim_data_capture/model.ckpt-10000 --output_directory=frozen_models/frozen_sim_inception/`
 
 
 ### For Real Data
